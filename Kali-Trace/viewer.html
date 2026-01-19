@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kali Terminal Log Viewer v2.1</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap');
+
+        /* Theme Variables - Applied to body to match class selector */
+        body.theme-cyberpunk {
+            --bg-color: #050505;
+            --sidebar-bg: #0a0a0a;
+            --card-bg: #111;
+            --accent-primary: #00ff9d;
+            --accent-secondary: #00bcd4;
+            --accent-danger: #ff0055;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --border-color: #333;
+            --highlight-bg: rgba(0, 255, 157, 0.4);
+            --highlight-current: rgba(0, 255, 157, 0.8);
+            --font-family: 'JetBrains Mono', monospace;
+        }
+
+        body.theme-matrix {
+            --bg-color: #000000;
+            --sidebar-bg: #020a02;
+            --card-bg: #051a05;
+            --accent-primary: #00ff00;
+            --accent-secondary: #008f11;
+            --accent-danger: #ff0000;
+            --text-primary: #00ff00;
+            --text-secondary: #008f11;
+            --border-color: #003300;
+            --highlight-bg: rgba(0, 255, 0, 0.4);
+            --highlight-current: rgba(0, 255, 0, 0.8);
+            --font-family: 'Courier New', monospace;
+        }
+
+        body.theme-light {
+            --bg-color: #f0f2f5;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --accent-primary: #0969da;
+            --accent-secondary: #57606a;
+            --accent-danger: #cf222e;
+            --text-primary: #24292f;
+            --text-secondary: #57606a;
+            --border-color: #d0d7de;
+            --highlight-bg: rgba(255, 215, 0, 0.5);
+            --highlight-current: rgba(255, 165, 0, 0.8);
+            --font-family: 'Consolas', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Sidebar */
+        aside {
+            width: 280px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            z-index: 10;
+        }
+
+        .logo {
+            font-family: var(--font-family);
+            color: var(--accent-primary);
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .btn.active {
+            background: var(--accent-primary);
+            color: #000;
+            border-color: var(--accent-primary);
+        }
+
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 40px;
+            height: 20px;
+            background: var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .toggle-switch.checked {
+            background: var(--accent-primary);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            left: 2px;
+            top: 2px;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .toggle-switch.checked::after {
+            transform: translateX(20px);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Search Bar */
+        .toolbar {
+            padding: 1rem;
+            background: var(--bg-color);
+            /* Match body bg for seamless look */
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .search-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.7rem 1rem 0.7rem 2.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 6px;
+            font-family: var(--font-family);
+            font-size: 0.9rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .match-counter {
+            min-width: 80px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Editor/Log View */
+        #log-container {
+            flex: 1;
+            overflow: auto;
+            padding: 1rem;
+            font-family: var(--font-family);
+            font-size: 14px;
+            line-height: 1.6;
+            position: relative;
+            scroll-behavior: smooth;
+        }
+
+        .log-line {
+            display: flex;
+            white-space: pre-wrap;
+            padding: 0 4px;
+            border-left: 2px solid transparent;
+        }
+
+        .log-line:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .log-line.bookmarked {
+            border-left-color: var(--accent-secondary);
+            background: rgba(0, 188, 212, 0.1);
+        }
+
+        .ln-num {
+            color: var(--text-secondary);
+            user-select: none;
+            width: 40px;
+            text-align: right;
+            margin-right: 1rem;
+            opacity: 0.5;
+            cursor: pointer;
+            font-size: 0.8em;
+            padding-top: 2px;
+        }
+
+        .ln-num:hover {
+            opacity: 1;
+            color: var(--accent-primary);
+        }
+
+        .ts {
+            color: var(--accent-secondary);
+            margin-right: 1rem;
+            user-select: none;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .ts.hidden {
+            display: none;
+        }
+
+        .content {
+            color: var(--text-primary);
+            flex: 1;
+            word-break: break-all;
+        }
+
+        /* Syntax Highlighting */
+        .cmd-prompt {
+            color: var(--accent-primary);
+            font-weight: bold;
+        }
+
+        .cmd-root {
+            color: var(--accent-danger);
+            font-weight: bold;
+        }
+
+        .ip-addr {
+            color: #f4a261;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .file-path {
+            color: #e9c46a;
+            font-style: italic;
+        }
+
+        .keyword-error {
+            color: var(--accent-danger);
+            font-weight: bold;
+        }
+
+        /* Search Highlights */
+        .highlight {
+            background: var(--highlight-bg);
+            border-radius: 2px;
+        }
+
+        .highlight.current {
+            background: var(--highlight-current);
+            box-shadow: 0 0 0 1px var(--accent-primary);
+        }
+
+        /* Drop Zone */
+        #drop-zone {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 4px dashed var(--accent-primary);
+            color: var(--accent-primary);
+            backdrop-filter: blur(5px);
+        }
+
+        #drop-zone.hidden {
+            display: none;
+        }
+
+        /* Minimap */
+        #minimap {
+            width: 60px;
+            border-left: 1px solid var(--border-color);
+            background: var(--sidebar-bg);
+            position: relative;
+            overflow: hidden;
+            display: none;
+            /* Hidden on mobile */
+        }
+
+        @media (min-width: 1024px) {
+            #minimap {
+                display: block;
+            }
+        }
+
+        /* Stats Panel */
+        #stats-panel {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            display: flex;
+            gap: 2rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            z-index: 20;
+        }
+
+        /* IP Panel Modal */
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            border: 1px solid var(--accent-primary);
+            padding: 2rem;
+            border-radius: 8px;
+            z-index: 200;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal.visible {
+            display: block;
+        }
+
+        .modal-header {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: var(--accent-primary);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .close-modal {
+            cursor: pointer;
+        }
+
+        .ip-list {
+            list-style: none;
+        }
+
+        .ip-list li {
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .ip-list li:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body class="theme-cyberpunk">
+
+    <aside>
+        <div class="logo">
+            <span style="font-size:1.5em; margin-right:5px;">⚡</span> Kali Logs Viewer
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">File</div>
+            <label class="btn" style="text-align: center; display: block; padding-top: 0.6rem;">
+                Open Log File
+                <input type="file" id="fileInput" accept=".log,.txt" style="display: none;">
+            </label>
+            <button class="btn" onclick="exportData('json')">Export JSON</button>
+            <button class="btn" onclick="exportData('html')">Export HTML Report</button>
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">View Options</div>
+            <div class="toggle-row">
+                <span>Timestamps</span>
+                <div class="toggle-switch checked" id="toggle-ts" onclick="toggleTimestamps()"></div>
+            </div>
+            <div class="toggle-row">
+                <span>Line Numbers</span>
+                <div class="toggle-switch checked" id="toggle-ln" onclick="toggleLineNumbers()"></div>
+            </div>
+            <div class="toggle-row">
+                <span>Minimap</span>
+                <div class="toggle-switch checked" id="toggle-map" onclick="toggleMinimap()"></div>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">Theme</div>
+            <select id="theme-select" class="btn" onchange="setTheme(this.value)">
+                <option value="theme-cyberpunk">Cyberpunk (Dark)</option>
+                <option value="theme-matrix">Matrix (Hacker)</option>
+                <option value="theme-light">Corporate (Light)</option>
+            </select>
+            <div class="toggle-row" style="margin-top: 10px;">
+                <span>Font Size</span>
+                <input type="range" id="font-slider" min="10" max="24" value="14" oninput="setFontSize(this.value)"
+                    style="width: 100px;">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">Tools</div>
+            <button class="btn" onclick="showIPPanel()">Extracted IPs <span id="ip-badge"
+                    style="background:var(--accent-primary); color:black; padding:2px 6px; border-radius:10px; font-size:0.8em; margin-left: 5px;">0</span></button>
+
+            <div class="toggle-row">
+                <span>Focus Commands</span>
+                <!-- Added onclick toggle logic for class -->
+                <div class="toggle-switch" id="toggle-focus" onclick="toggleFocusMode()"></div>
+            </div>
+            <div class="toggle-row">
+                <span>Raw View</span>
+                <div class="toggle-switch" id="toggle-raw" onclick="toggleRaw()"></div>
+            </div>
+
+            <button class="btn" onclick="fullScreenMode()">Full Screen Mode</button>
+        </div>
+
+    </aside>
+
+    <main>
+        <div class="toolbar">
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="search-input"
+                    placeholder="Regex Search (e.g., 'sudo|root')">
+                <div
+                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.8rem; color: var(--text-secondary);">
+
+                </div>
+            </div>
+
+            <div class="match-counter" id="match-counter">0/0</div>
+
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="nextMatch(-1)">▲</button>
+                <button class="nav-btn" onclick="nextMatch(1)">▼</button>
+            </div>
+
+            <div class="toggle-row" style="gap: 5px; margin-bottom: 0;">
+                <label style="font-size: 0.8rem; color: var(--text-secondary); cursor: pointer;"><input type="checkbox"
+                        id="regex-toggle"> Regex</label>
+                <label style="font-size: 0.8rem; color: var(--text-secondary); cursor: pointer;"><input type="checkbox"
+                        id="case-toggle"> Case</label>
+            </div>
+        </div>
+
+        <div style="display: flex; flex: 1; overflow: hidden;">
+            <div id="log-container"></div>
+            <canvas id="minimap"></canvas>
+        </div>
+
+        <div id="stats-panel">
+            <div id="stat-lines">Lines: 0</div>
+            <div id="stat-duration">Duration: 00:00:00</div>
+            <div id="stat-cmds">Commands detected: 0</div>
+            <div style="margin-left: auto;">Kali Logger v2.1</div>
+        </div>
+
+        <div id="drop-zone">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">📂</div>
+            <h2>Drag & Drop Log File</h2>
+            <p>or use "Open Log File" in sidebar</p>
+        </div>
+    </main>
+
+    <!-- Modal for IPs -->
+    <div id="ip-modal" class="modal">
+        <div class="modal-header">
+            <span>Extracted IP Addresses</span>
+            <span class="close-modal" onclick="document.getElementById('ip-modal').classList.remove('visible')">✕</span>
+        </div>
+        <ul id="ip-list-ul" class="ip-list"></ul>
+    </div>
+
+    <script>
+        // --- State ---
+        let rawLines = [];
+        let parsedLines = [];
+        let searchMatches = [];
+        let currentMatchIdx = -1;
+        let uniqueIPs = new Set();
+        let settings = {
+            timestamps: true,
+            lineNumbers: true,
+            minimap: true,
+            regex: false,
+            caseSensitive: false,
+            raw: false,
+            focusMode: false
+        };
+
+        // --- DOM Elements ---
+        const logContainer = document.getElementById('log-container');
+        const searchInput = document.getElementById('search-input');
+        const matchCounter = document.getElementById('match-counter');
+        const dropZone = document.getElementById('drop-zone');
+        const minimapCanvas = document.getElementById('minimap');
+
+        // --- Initialization ---
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+        // Drag and Drop
+        document.body.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.remove('hidden'); });
+        document.body.addEventListener('dragleave', e => { if (e.relatedTarget == null) dropZone.classList.add('hidden'); });
+        document.body.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.classList.add('hidden');
+            if (e.dataTransfer.files.length) readFile(e.dataTransfer.files[0]);
+        });
+
+        function handleFileSelect(e) {
+            if (e.target.files.length) readFile(e.target.files[0]);
+        }
+
+        function readFile(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const text = e.target.result;
+                parseLog(text);
+                renderLog();
+                analyzeStats();
+                dropZone.classList.add('hidden');
+            };
+            reader.readAsText(file);
+        }
+
+        // --- Core Parsing ---
+        function parseLog(text) {
+            rawLines = text.split(/\r?\n/);
+            parsedLines = [];
+            uniqueIPs.clear();
+
+            // Regex for Timestamp: [YYYY-MM-DD HH:MM:SS]
+            const tsRegex = /^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]\s?(.*)/;
+
+            // Regex for IP
+            const ipRegex = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g;
+
+            rawLines.forEach((line, idx) => {
+                const match = line.match(tsRegex);
+                let ts = "";
+                let content = line;
+
+                if (match) {
+                    ts = match[1];
+                    content = match[2];
+                }
+
+                // IP Extraction
+                if (content) {
+                    const ips = content.match(ipRegex);
+                    if (ips) ips.forEach(ip => uniqueIPs.add(ip));
+                }
+
+                parsedLines.push({
+                    idx: idx + 1,
+                    ts,
+                    content,
+                    bookmarked: false
+                });
+            });
+
+            document.getElementById('stat-lines').innerText = `Lines: ${parsedLines.length}`;
+            document.getElementById('ip-badge').innerText = uniqueIPs.size;
+        }
+
+        // --- Rendering ---
+        function renderLog() {
+            logContainer.innerHTML = '';
+
+            // Filter set
+            let linesToRender = parsedLines;
+
+            // Focus Mode Filtering
+            if (settings.focusMode) {
+                linesToRender = parsedLines.filter(l =>
+                    l.content.includes('$') ||
+                    l.content.includes('#') ||
+                    l.content.includes('┌──') ||
+                    l.content.includes('└──')
+                );
+            }
+
+            const frag = document.createDocumentFragment();
+
+            linesToRender.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'log-line';
+                div.id = `line-${item.idx}`; // Map ID to original index for simplicity? Or search needs remapping.
+                // Actually search works on DOM or logic. Let's fix search logic later to respect filtering.
+                // For V2.1, assume full re-render is standard.
+
+                if (item.bookmarked) div.classList.add('bookmarked');
+
+                // Line Number
+                if (settings.lineNumbers) {
+                    const ln = document.createElement('span');
+                    ln.className = 'ln-num';
+                    ln.textContent = item.idx;
+                    ln.onclick = () => toggleBookmark(item.idx);
+                    div.appendChild(ln);
+                }
+
+                // Timestamp
+                if (settings.timestamps && item.ts) {
+                    const ts = document.createElement('span');
+                    ts.className = 'ts';
+                    ts.textContent = "[" + item.ts.split(' ')[1] + "]";
+                    ts.title = item.ts;
+                    div.appendChild(ts);
+                }
+
+                // Content
+                const contentSpan = document.createElement('span');
+                contentSpan.className = 'content';
+
+                let html = escapeHtml(item.content);
+
+                // Raw View Check
+                if (!settings.raw) {
+                    html = syntaxHighlight(html);
+                }
+
+                contentSpan.innerHTML = html;
+                div.appendChild(contentSpan);
+
+                frag.appendChild(div);
+            });
+
+            logContainer.appendChild(frag);
+
+            // If search exists, re-apply over rendered content
+            if (searchInput.value) performSearch();
+            renderMinimap();
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        function syntaxHighlight(html) {
+            // Highlights IPs, Prompts, etc
+            html = html.replace(/┌──\(.*?\)/, '<span class="cmd-prompt">$&</span>');
+            html = html.replace(/└─\$ /, '<span class="cmd-prompt">$&</span>');
+            html = html.replace(/# /, '<span class="cmd-root">$&</span>');
+            html = html.replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, '<span class="ip-addr" onclick="filterIP(this.innerText)">$&</span>');
+            html = html.replace(/(Error|Exception|Failed|Denied)/ig, '<span class="keyword-error">$&</span>');
+            return html;
+        }
+
+        // --- Advanced Features ---
+        function toggleRaw() {
+            settings.raw = !settings.raw;
+            document.getElementById('toggle-raw').classList.toggle('checked');
+            renderLog();
+        }
+
+        function toggleFocusMode() {
+            settings.focusMode = !settings.focusMode;
+            document.getElementById('toggle-focus').classList.toggle('checked');
+            renderLog();
+        }
+
+        // --- Search System ---
+        searchInput.addEventListener('input', () => performSearch());
+        document.getElementById('regex-toggle').addEventListener('change', (e) => { settings.regex = e.target.checked; performSearch(); });
+        document.getElementById('case-toggle').addEventListener('change', (e) => { settings.caseSensitive = e.target.checked; performSearch(); });
+
+        function performSearch() {
+            const query = searchInput.value;
+            // Use renderLog logic to reset first, but if we call renderLog here it loops?
+            // No, renderLog calls performSearch IF query exists.
+            // So if we type, we want to update highlights.
+            // If we call renderLog(), it destroys DOM.
+            // Efficient way:
+            // 1. If query is empty -> renderLog() (Clean slate)
+            // 2. If query exists -> We need to highlight.
+            //    Problem: Highlight replaces HTML. Syntax Highlight also replaces HTML.
+            //    If we blindly apply over existing DOM, it works if safe.
+            //    But renderLog() creates clean DOM.
+            //    Let's decouple:
+            //    renderLog() -> simply renders CONTENT.
+            //    performSearch() -> if query, reruns renderLog() logic BUT inserts highlights.
+            //    Wait, infinite recursion if renderLog calls performSearch.
+            //    FIX: Remove performSearch call from renderLog.
+            //    Call performSearch EXPLICITLY when needed.
+
+            // New Plan: performSearch does the rendering if query exists.
+            if (!query) {
+                searchMatches = [];
+                currentMatchIdx = -1;
+                updateCounter();
+
+                // Only re-render if we were searching before (optimization) or just force it.
+                // Force rerender to clear highlights
+                renderLogForSearchClear();
+                return;
+            }
+
+            let regex;
+            try {
+                const flags = settings.caseSensitive ? 'g' : 'gi';
+                regex = settings.regex ? new RegExp(query, flags) : new RegExp(escapeRegExp(query), flags);
+            } catch (e) {
+                searchInput.style.borderColor = 'red';
+                return;
+            }
+            searchInput.style.borderColor = '';
+
+            // We need to rebuild DOM to include highlights safely
+            logContainer.innerHTML = '';
+            const frag = document.createDocumentFragment();
+            let matchCount = 0;
+            searchMatches = [];
+
+            // Apply Filters (Focus Mode)
+            let linesToRender = parsedLines;
+            if (settings.focusMode) {
+                linesToRender = parsedLines.filter(l =>
+                    l.content.includes('$') || l.content.includes('#') || l.content.includes('┌──')
+                );
+            }
+
+            linesToRender.forEach((item, lineIndex) => { // LineIndex is index in filtered array
+                const matches = [...item.content.matchAll(regex)];
+                const hasMatch = matches.length > 0;
+
+                const div = document.createElement('div');
+                div.className = 'log-line';
+                div.id = `line-${item.idx}`; // Keep original ID
+
+                if (settings.lineNumbers) {
+                    const ln = document.createElement('span'); ln.className = 'ln-num'; ln.textContent = item.idx;
+                    ln.onclick = () => toggleBookmark(item.idx); div.appendChild(ln);
+                }
+
+                if (settings.timestamps && item.ts) {
+                    const ts = document.createElement('span'); ts.className = 'ts'; ts.textContent = "[" + item.ts.split(' ')[1] + "]";
+                    div.appendChild(ts);
+                }
+
+                const contentSpan = document.createElement('span');
+                contentSpan.className = 'content';
+
+                let html = escapeHtml(item.content);
+
+                if (hasMatch) {
+                    // Apply Highlight (Ignores Syntax Highlighting to prevent breakage)
+                    html = html.replace(regex, (m) => {
+                        searchMatches.push({ id: `match-${matchCount}`, lineId: `line-${item.idx}` });
+                        const span = `<span class="highlight" id="match-${matchCount}">${m}</span>`;
+                        matchCount++;
+                        return span;
+                    });
+                } else if (!settings.raw) {
+                    // Fallback to syntax highlight if no match found in this line?
+                    // Or just inconsistent?
+                    // Let's just syntax highlight lines that DON'T match?
+                    // Or: Syntax highlight FIRST, then Regex replace text?
+                    // RISKY.
+                    // V2 Decision: Search highlights override syntax for matched lines.
+                    html = syntaxHighlight(html); // Might break if regex matches inside span tags.
+                    // Let's disable syntax highlight on search for stability.
+                    // Or keep it simple: Raw text + Search Highlight.
+                    if (!settings.raw) {
+                        // html = syntaxHighlight(html); // DISABLED for search stability
+                    }
+                }
+
+                contentSpan.innerHTML = html;
+                div.appendChild(contentSpan);
+                frag.appendChild(div);
+            });
+
+            logContainer.appendChild(frag);
+            updateCounter();
+            renderMinimap();
+        }
+
+        // Helper to avoid recursion
+        function renderLogForSearchClear() {
+            // Just call renderLog, but we removed the performSearch call inside it.
+            renderBasicLog();
+        }
+
+        // Refactored Render Logic
+        function renderLog() {
+            if (searchInput.value) {
+                performSearch();
+            } else {
+                renderBasicLog();
+            }
+        }
+
+        function renderBasicLog() {
+            // ... Copy of the Render Logic ... 
+            // Reuse code?
+            // Let's keep one render function that takes 'highlightRegex' argument?
+
+            logContainer.innerHTML = '';
+            let linesToRender = parsedLines;
+            if (settings.focusMode) {
+                linesToRender = parsedLines.filter(l => l.content.includes('$') || l.content.includes('#') || l.content.includes('┌──'));
+            }
+
+            const frag = document.createDocumentFragment();
+            linesToRender.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'log-line';
+                div.id = `line-${item.idx}`;
+                if (item.bookmarked) div.classList.add('bookmarked');
+
+                if (settings.lineNumbers) {
+                    const ln = document.createElement('span'); ln.className = 'ln-num'; ln.textContent = item.idx;
+                    ln.onclick = () => toggleBookmark(item.idx); div.appendChild(ln);
+                }
+                if (settings.timestamps && item.ts) {
+                    const ts = document.createElement('span'); ts.className = 'ts'; ts.textContent = "[" + item.ts.split(' ')[1] + "]";
+                    ts.title = item.ts; div.appendChild(ts);
+                }
+
+                const contentSpan = document.createElement('span');
+                contentSpan.className = 'content';
+                let html = escapeHtml(item.content);
+                if (!settings.raw) html = syntaxHighlight(html);
+                contentSpan.innerHTML = html;
+                div.appendChild(contentSpan);
+                frag.appendChild(div);
+            });
+            logContainer.appendChild(frag);
+            renderMinimap();
+        }
+
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function nextMatch(direction) {
+            if (searchMatches.length === 0) return;
+
+            if (currentMatchIdx > -1) {
+                const prev = document.getElementById(searchMatches[currentMatchIdx].id);
+                if (prev) prev.classList.remove('current');
+            }
+
+            currentMatchIdx += direction;
+            if (currentMatchIdx >= searchMatches.length) currentMatchIdx = 0;
+            if (currentMatchIdx < 0) currentMatchIdx = searchMatches.length - 1;
+
+            const matchObj = searchMatches[currentMatchIdx];
+            const el = document.getElementById(matchObj.id);
+            if (el) {
+                el.classList.add('current');
+                // Scroll into view
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+            updateCounter();
+        }
+
+        function updateCounter() {
+            if (searchMatches.length > 0) {
+                matchCounter.textContent = `${currentMatchIdx + 1} / ${searchMatches.length}`;
+            } else {
+                matchCounter.textContent = "0 / 0";
+            }
+        }
+
+        // --- Features ---
+        function toggleBookmark(idx) {
+            // Find in parsedLines (index is 1-based)
+            const line = parsedLines[idx - 1];
+            if (line) {
+                line.bookmarked = !line.bookmarked;
+                // Update specific DOM element without full re-render
+                const el = document.getElementById(`line-${idx}`);
+                if (el) el.classList.toggle('bookmarked');
+            }
+        }
+
+        function toggleTimestamps() {
+            settings.timestamps = !settings.timestamps;
+            document.getElementById('toggle-ts').classList.toggle('checked');
+            renderLog();
+        }
+
+        function toggleLineNumbers() {
+            settings.lineNumbers = !settings.lineNumbers;
+            document.getElementById('toggle-ln').classList.toggle('checked');
+            renderLog();
+        }
+
+        function toggleMinimap() {
+            settings.minimap = !settings.minimap;
+            document.getElementById('toggle-map').classList.toggle('checked');
+            document.getElementById('minimap').style.display = settings.minimap ? 'block' : 'none';
+        }
+
+        function setTheme(theme) {
+            document.body.className = theme;
+        }
+
+        function setFontSize(val) {
+            logContainer.style.fontSize = val + "px";
+        }
+
+        function showIPPanel() {
+            const list = document.getElementById('ip-list-ul');
+            list.innerHTML = "";
+            uniqueIPs.forEach(ip => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${ip}</span> <span style="font-size:0.8em; cursor:pointer; color:var(--accent-primary);" onclick="window.open('https://ipinfo.io/${ip}')">Whois ↗</span>`;
+                list.appendChild(li);
+            });
+            document.getElementById('ip-modal').classList.add('visible');
+        }
+
+        function exportData(type) {
+            let data = "";
+            if (type === 'json') {
+                data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(parsedLines));
+                download(data, "log_export.json");
+            } else {
+                const htmlContent = `<html><body><pre>${parsedLines.map(l => `[${l.ts}] ${l.content}`).join('\n')}</pre></body></html>`;
+                data = "data:text/html;charset=utf-8," + encodeURIComponent(htmlContent);
+                download(data, "log_report.html");
+            }
+        }
+
+        function download(dataUrl, filename) {
+            const a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = filename;
+            a.click();
+        }
+
+        function fullScreenMode() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        function analyzeStats() {
+            if (parsedLines.length > 1) {
+                // Approximate time
+                const start = parsedLines[0].ts ? new Date(parsedLines[0].ts) : null;
+                const end = parsedLines[parsedLines.length - 1].ts ? new Date(parsedLines[parsedLines.length - 1].ts) : null;
+
+                if (start && end && !isNaN(start) && !isNaN(end)) {
+                    const diff = end - start;
+                    const hours = Math.floor(diff / 3600000);
+                    const mins = Math.floor((diff % 3600000) / 60000);
+                    document.getElementById('stat-duration').innerText = `Duration: ${hours}h ${mins}m`;
+                }
+            }
+
+            const cmdCount = parsedLines.filter(l => l.content.includes('$') || l.content.includes('#')).length;
+            document.getElementById('stat-cmds').innerText = `Commands: ~${cmdCount}`;
+        }
+
+        function renderMinimap() {
+            if (!settings.minimap) return;
+            const ctx = minimapCanvas.getContext('2d');
+            minimapCanvas.width = 60;
+            minimapCanvas.height = logContainer.clientHeight;
+
+            const lineH = Math.max(1, minimapCanvas.height / parsedLines.length);
+            ctx.clearRect(0, 0, 60, minimapCanvas.height);
+
+            // Get styles
+            const style = getComputedStyle(document.body);
+            ctx.fillStyle = style.getPropertyValue('--text-secondary');
+
+            parsedLines.forEach((l, i) => {
+                if (l.content.trim().length > 0) {
+                    ctx.fillRect(0, i * lineH, Math.min(l.content.length / 2, 50), lineH);
+                }
+            });
+
+            // Matches
+            ctx.fillStyle = style.getPropertyValue('--accent-primary');
+            searchMatches.forEach(m => {
+                // Hacky mapping id to index
+                const idx = parseInt(m.lineId.split('-')[1]);
+                ctx.fillRect(0, idx * lineH, 60, Math.max(2, lineH));
+            });
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowUp' && (e.ctrlKey || e.metaKey)) nextMatch(-1);
+            if (e.key === 'ArrowDown' && (e.ctrlKey || e.metaKey)) nextMatch(1);
+        });
+
+    </script>
+</body>
+
+</html>
