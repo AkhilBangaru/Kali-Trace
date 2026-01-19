@@ -120,6 +120,21 @@ Do not use this tool on systems where logging is not permitted.
 - Live logging dashboard
 - Encrypted log storage
 
+
+## 📸 Screenshots
+**1.Matrix Theme**
+
+<img width="2560" height="1443" alt="Screenshot 2026-01-19 at 20-55-05 Kali Terminal Log Viewer v2 1" src="https://github.com/user-attachments/assets/4bfbeb6c-ba09-4acc-85d4-80f4d745af7f" />
+
+**2.Cyber Punk Theme**
+
+<img width="2560" height="1443" alt="Screenshot 2026-01-19 at 20-56-21 Kali Terminal Log Viewer v2 1" src="https://github.com/user-attachments/assets/e155db9b-0fa6-4a4c-89ef-854b21579c6a" />
+
+**3.Corporate(light) Theme**
+
+<img width="2560" height="1443" alt="Screenshot 2026-01-19 at 20-58-50 Kali Terminal Log Viewer v2 1" src="https://github.com/user-attachments/assets/03414d3a-be66-47bc-898b-81caa4ca83f7" />
+
+
 ---
 
 ## 📜 License
