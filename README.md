@@ -66,7 +66,7 @@ CmdScope/
 
 ## 🛠 Installation
 
-```bash
+```
 chmod +x install.sh
 sudo ./install.sh
 ```
@@ -75,7 +75,7 @@ This enables automatic terminal activity logging.
 
 ### Uninstall
 
-```bash
+```
 chmod +x uninstall.sh
 sudo ./uninstall.sh
 ```
