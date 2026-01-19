@@ -123,17 +123,17 @@ Do not use this tool on systems where logging is not permitted.
 
 ## 📸 Screenshots
 **1.Matrix Theme**
+<img width="2560" height="1552" alt="image" src="https://github.com/user-attachments/assets/93bfd468-37cf-41e8-b9ba-41afd32af112" />
 
-<img width="2560" height="1443" alt="Screenshot 2026-01-19 at 20-55-05 Kali Terminal Log Viewer v2 1" src="https://github.com/user-attachments/assets/4bfbeb6c-ba09-4acc-85d4-80f4d745af7f" />
 
 **2.Cyber Punk Theme**
 
-<img width="2560" height="1443" alt="Screenshot 2026-01-19 at 20-56-21 Kali Terminal Log Viewer v2 1" src="https://github.com/user-attachments/assets/e155db9b-0fa6-4a4c-89ef-854b21579c6a" />
+<img width="2560" height="1552" alt="image" src="https://github.com/user-attachments/assets/bc5a98b1-3beb-4868-b744-11adc0ce4d67" />
+
 
 **3.Corporate(light) Theme**
 
-<img width="2560" height="1443" alt="Screenshot 2026-01-19 at 20-58-50 Kali Terminal Log Viewer v2 1" src="https://github.com/user-attachments/assets/03414d3a-be66-47bc-898b-81caa4ca83f7" />
-
+<img width="2560" height="1552" alt="image" src="https://github.com/user-attachments/assets/10cfd6e5-9529-418a-bed5-8601eb5c4de7" />
 
 ---
 
