@@ -2,7 +2,7 @@
 
 # KaliTrace
 **Terminal Activity Logger & Analyzer**
-<img width="4608" height="3072" alt="ChatGPT Image Jan 19, 2026, 08_42_16 PM_upscayl_3x_ultrasharp-4x" src="https://github.com/user-attachments/assets/6d0cc59a-1279-413a-929a-77cdd09f5292" />
+<img width="4608" height="3072" alt="Logo" src="https://github.com/user-attachments/assets/6d0cc59a-1279-413a-929a-77cdd09f5292" />
 ---
 
 ## 🔍 Overview
