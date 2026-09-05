@@ -5,7 +5,7 @@
 <img width="4608" height="3072" alt="Logo" src="https://github.com/user-attachments/assets/6d0cc59a-1279-413a-929a-77cdd09f5292" />
 ---
 
-## 🔍 Overview
+##  Overview
 
 KaliTrace is a professional-grade terminal activity logging and visualization tool designed for cybersecurity practitioners, red teamers, blue team analysts, and learners.
 
@@ -19,7 +19,7 @@ KaliTrace is ideal for:
 - Learning revision
 - Forensic-style terminal analysis
 
-## 🚀 Features
+##  Features
 
 ### Terminal Logging
 - Full command input logging
@@ -51,7 +51,7 @@ KaliTrace is ideal for:
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 CmdScope/
@@ -64,7 +64,7 @@ CmdScope/
 
 ---
 
-## 🛠 Installation
+##  Installation
 
 ```
 chmod +x install.sh
@@ -82,7 +82,7 @@ sudo ./uninstall.sh
 
 ---
 
-## 🧪 Usage
+##  Usage
 
 1. Open terminal
 2. Perform commands normally
@@ -93,7 +93,7 @@ sudo ./uninstall.sh
 
 ---
 
-## 🎯 Use Cases
+##  Use Cases
 
 - Penetration testing documentation
 - Red team operation logs
@@ -103,7 +103,7 @@ sudo ./uninstall.sh
 
 ---
 
-## 🔐 Security & Ethics
+##  Security & Ethics
 
 KaliTrace is intended for **educational, defensive, and authorized testing only**.
 
@@ -111,7 +111,7 @@ Do not use this tool on systems where logging is not permitted.
 
 ---
 
-## 🔮 Future Enhancements
+##  Future Enhancements
 
 - Session-based log separation
 - Automatic report generation (PDF)
@@ -121,7 +121,7 @@ Do not use this tool on systems where logging is not permitted.
 - Encrypted log storage
 
 
-## 📸 Screenshots
+##  Screenshots
 **1.Matrix Theme**
 <img width="2560" height="1552" alt="image" src="https://github.com/user-attachments/assets/93bfd468-37cf-41e8-b9ba-41afd32af112" />
 
@@ -137,12 +137,12 @@ Do not use this tool on systems where logging is not permitted.
 
 ---
 
-## 📜 License
+##  License
 
 MIT License
 
 ---
 
-## 👤 Author
+##  Author
 
 AkhilBangaru
